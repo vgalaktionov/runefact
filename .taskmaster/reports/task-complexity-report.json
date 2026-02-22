@@ -1,0 +1,173 @@
+{
+	"meta": {
+		"generatedAt": "2026-02-22T15:47:55.924Z",
+		"tasksAnalyzed": 20,
+		"totalTasks": 20,
+		"analysisCount": 20,
+		"thresholdScore": 5,
+		"projectName": "Task Master",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Project Setup and Core Infrastructure",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) Go module initialization and directory structure creation, 2) TOML config schema definition and parser implementation with ProjectConfig struct, 3) FindProjectRoot() function with directory traversal logic, 4) CLI scaffolding with cobra or flag package for all commands (build, validate, preview, watch, init, mcp, docs), 5) runefact init command implementation with demo file scaffolding. Include error handling and path resolution utilities.",
+			"reasoning": "Greenfield project setup with multiple components. The CLI scaffolding requires designing command structure upfront. Config parsing with TOML is straightforward using established libraries. The init command needs to scaffold demo files across multiple formats (palette, sprite, map, instrument, sfx, track) which adds complexity. Directory traversal for FindProjectRoot is simple. Overall moderate complexity due to the breadth of setup required but each piece is well-defined."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Palette Parser and Color Resolution",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: 1) Color struct and Palette struct definitions with TOML tags, 2) ParseHexColor function supporting #RGB, #RRGGBB, #RRGGBBAA formats with validation, 3) ParsePalette function handling transparent keyword and color map, 4) ResolvePalette function with multi-path search and SuggestSimilarKey using Levenshtein distance. Include comprehensive error messages with file/line references.",
+			"reasoning": "Relatively straightforward parsing task. TOML parsing is handled by library. Main complexity is hex color parsing with multiple formats and transparent keyword handling. Levenshtein distance for suggestions adds some complexity but is a well-known algorithm. Error reporting with line numbers requires some care. Low to moderate complexity overall."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Sprite Parser and Pixel Grid Handling",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into: 1) SpriteFile, Sprite, and Frame struct definitions with TOML parsing, 2) Pixel grid parser handling single-char keys and [xx] bracket syntax with row parsing, 3) Frame dimension validation ensuring all frames match and grid size is correct, 4) palette_extend handling and merging with base palette, 5) Cross-file palette resolution and unknown key collection for batch errors, 6) ResolvedSprite construction with actual Color values. Focus on robust error handling with line numbers for ragged rows and unclosed brackets.",
+			"reasoning": "This is more complex due to the custom pixel grid parsing with both single-char and bracket notation. The stateful parsing of [xx] sequences, validation of ragged rows with line tracking, and frame dimension matching all add complexity. The palette_extend merging and cross-file resolution introduce dependencies. Multiple TOML section types ([sprite.X] and [[sprite.X.frame]]) require careful parsing. Higher complexity."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "PNG Sprite Sheet Renderer",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: 1) Sheet dimension calculation algorithm (max width from frames, sum of heights), 2) Sprite sheet layout logic with horizontal frames and vertical sprite stacking, 3) Pixel rendering using image.RGBA with color.RGBA conversion, 4) PNG encoding and output path handling with directory creation. Include SpriteSheetMeta generation for manifest integration.",
+			"reasoning": "Go's image stdlib makes PNG generation straightforward. The main complexity is the layout algorithm for multiple sprites with different frame counts. Calculating correct positions and tracking metadata for each sprite requires careful bookkeeping. The actual pixel-by-pixel rendering is simple. Moderate complexity."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Map Parser and JSON Tilemap Output",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) MapFile, Tileset, TileLayer, and EntityLayer struct definitions, 2) Tileset parsing with sprite reference validation (file:sprite format), 3) Tile layer grid parsing with char-to-index mapping, 4) Entity layer parsing with [[layer.X.entity]] sections and properties, 5) JSON output generation matching the specified schema with tile_size, width, height, tileset, and layers. Handle unknown tileset keys as warnings.",
+			"reasoning": "Similar complexity to sprite parsing but with additional tile layer and entity layer concepts. The tileset-to-sprite reference resolution requires cross-file validation. Grid parsing reuses patterns from sprite parsing. Entity layers with properties add TOML array parsing complexity. JSON marshaling is straightforward. Moderate to moderately-high complexity."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Go Manifest Generator",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: 1) ManifestData aggregation from sprite, map, and audio metadata, 2) Name conversion utilities (kebab-case to PascalCase, file names to const names), 3) Go code template definition with proper formatting for constants, structs, and maps, 4) File writing with DO NOT EDIT header and configurable package name. Ensure generated code compiles.",
+			"reasoning": "Code generation using text/template is well-supported in Go. The main challenges are ensuring the generated Go code is syntactically valid and handling the naming conventions correctly. The template needs to handle multiple asset types. PascalCase conversion from various formats (kebab-case, snake_case) requires attention. Moderate complexity."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Build Command and Validation Pipeline",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into: 1) BuildOptions and BuildResult struct definitions with scope and file filtering, 2) Asset discovery scanning directories and grouping by extension, 3) Multi-phase build pipeline orchestration (palettes -> sprites -> maps -> instruments -> audio -> manifest), 4) Error aggregation distinguishing errors from warnings with continue-on-error, 5) Validation-only mode implementation without rendering, 6) CLI integration with flags (--sprites, --maps, --audio) and file arguments. Include progress output and exit code handling.",
+			"reasoning": "This is a coordination task that ties together all the parsers and renderers. The multi-phase pipeline with dependency ordering (palettes before sprites, sprites before maps) adds orchestration complexity. Error aggregation to report all issues in one run requires careful error collection. Supporting both full builds and filtered builds (by type or specific files) adds conditional logic. Higher complexity due to integration nature."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Audio Synthesis Engine: Oscillators and Envelopes",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into: 1) Oscillator interface and implementations (sine, square, triangle, sawtooth, noise, pulse with duty cycle), 2) ADSR envelope struct and Level() function with phase transitions, 3) Voice struct combining oscillator, envelope, frequency, and modulations, 4) Pitch calculation (MIDI to Hz) and pitch sweep with curve types (linear, exponential, logarithmic), 5) Vibrato implementation using LFO frequency modulation, 6) Biquad filter implementations (lowpass, highpass, bandpass) with cutoff sweep. Ensure sample values stay in [-1, 1].",
+			"reasoning": "Audio synthesis requires domain knowledge in DSP. Implementing correct waveform generators, ADSR envelopes with proper phase transitions, and biquad filters requires mathematical precision. Pitch sweeps with different curve types (linear, exponential, logarithmic interpolation) add complexity. Vibrato and filter modulation involve time-varying parameters. Higher complexity due to DSP domain."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Instrument and SFX Parsers with WAV Rendering",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) Instrument struct and .inst file parser matching schema, 2) SFX struct and .sfx file parser with multi-voice support, 3) SFX rendering mixing multiple voices with RenderSFX function, 4) WAV file writer with RIFF header and PCM conversion, 5) Audio safety features: brickwall limiter, DC offset removal, NaN/Inf detection, clipping warning. Integrate safety into render pipeline.",
+			"reasoning": "Builds on the audio synthesis engine (Task 8). The parsing is TOML-based and straightforward. Multi-voice mixing is additive and simple. WAV file format is well-documented. The audio safety features (limiter, DC removal, clipping detection) add complexity but are important. Moderate to moderately-high complexity, assuming Task 8 is complete."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Music Track Parser and Sequencer",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down into: 1) Track struct with tempo, ticks_per_beat, loop settings, channels, patterns, and sequence, 2) Channel and Pattern struct definitions with instrument references, 3) Pattern data parser splitting by | for columns and parsing notes (C4, C#5, ---, ..., ^^^), 4) Per-note effects parsing (v0F velocity, >02 pitch slide, ~04 vibrato, a08 arpeggio), 5) Sequencer implementation processing patterns in sequence with channel state tracking, 6) Note-on/note-off handling with envelope release triggering, 7) Rendering with samples-per-tick calculation, channel mixing, and loop handling. Integrate with instrument voice creation.",
+			"reasoning": "This is the most complex audio task. Tracker-style pattern parsing with column alignment, special symbols, and per-note effects requires careful string parsing. The sequencer needs to track state per channel (note-on, note-off, sustain). Integrating with instruments and handling envelope releases on note-off adds statefulness. Loop handling and tempo-to-samples calculation require precision. High complexity."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "File Watcher and Live Rebuild System",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) Watcher struct wrapping fsnotify with recursive directory watching, 2) Event filtering for rune file extensions only, 3) Debouncer implementation batching events within 100ms window with de-duplication, 4) Dependency tracking (palette -> sprites -> maps, instrument -> sfx/tracks), 5) IncrementalBuild integration and runefact watch command with graceful shutdown. Handle file create/delete/rename events.",
+			"reasoning": "fsnotify provides the core watching functionality. The main complexity is the debouncing logic to batch rapid changes and the dependency tracking to rebuild dependent files. Recursive directory watching and file filtering are straightforward. Graceful shutdown handling adds some edge case complexity. Moderate to moderately-high complexity."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Ebitengine Previewer: Core Window and Sprite Mode",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into: 1) Previewer struct implementing ebiten.Game interface with Update/Draw/Layout, 2) Sprite loading and grid layout rendering, 3) Animation playback advancing frames based on FPS, 4) Input handling (zoom, click isolation, pause, step, grid toggle, background cycle), 5) File watching integration with error overlay display, 6) State persistence to ~/.config/runefact/preview.json. Implement nearest-neighbor scaling for zoom.",
+			"reasoning": "Ebitengine is a well-documented game library, but building a previewer with multiple interaction modes adds complexity. The animation system, zoom handling with nearest-neighbor scaling, sprite isolation on click, and input handling require careful implementation. File watching integration with error overlays and state persistence add additional features. Higher complexity due to interactive nature."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Previewer: Map and Audio Modes",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Break down into: 1) Map preview mode with layer compositing and panning/zooming, 2) Layer visibility cycling and entity markers rendering, 3) SFX preview mode with waveform visualization and envelope/pitch graphs, 4) Music preview mode with tracker-style pattern view and scrolling, 5) Audio playback integration with ebitengine/audio and transport controls, 6) Audio safety (no auto-play, limiter, peak meter, clipping warning), 7) Asset browser mode with tree view and project-wide file watching. Handle large maps with viewport culling.",
+			"reasoning": "This extends the previewer significantly with three additional modes, each with its own complexity. Map preview needs layer compositing and viewport culling for large maps. Audio preview requires waveform visualization, graph rendering, and audio playback with safety features. The tracker view needs a custom scrolling pattern display. Asset browser adds tree view navigation. High complexity due to multiple distinct features."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "MCP Server Implementation",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) MCP server setup using github.com/mark3labs/mcp-go with stdio transport, 2) Tool handlers (build, validate, inspect_sprite/map/audio, list_assets, palette_colors, scaffold, format_help), 3) Resource handlers (project/status, formats/{type}, palette/{name}, manifest), 4) JSON schema definitions for tool inputs and structured outputs, 5) Error handling with no-project detection and concurrent build serialization. Log to stderr, not stdout.",
+			"reasoning": "MCP protocol handling is provided by the mcp-go library. The main complexity is designing the tool and resource interfaces, implementing JSON schemas, and properly handling concurrent access. Each tool handler wraps existing build/validation logic. Resources are read-only views of project state. The serialization of concurrent builds with mutex/timeout adds some complexity. Moderate to moderately-high complexity."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "VS Code Extension: Syntax Highlighting",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) VS Code extension project setup (package.json, TypeScript config), 2) TextMate grammars for each file type injecting on TOML base, 3) Pixel grid coloring with palette parsing and background decorations, 4) Tracker note coloring with chromatic pitch classes and special symbols, 5) Color decorators using DocumentColorProvider for hex colors with picker. Handle bracket [xx] multi-char keys and transparent styling.",
+			"reasoning": "VS Code extension development has its own ecosystem. TextMate grammars are declarative but can be complex for custom syntax. The pixel grid coloring requires parsing the palette and applying decorations programmatically. Tracker note coloring with chromatic colors is a visual enhancement. Color decorators for hex values are well-documented. Overall moderate to moderately-high complexity due to VS Code API and TextMate grammar learning curve."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "VS Code Extension: Inline Validation and Diagnostics",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) DiagnosticCollection setup and DocumentDiagnosticProvider implementation, 2) Per-file-type validation rules (palette, sprite, map, track) with error/warning classification, 3) Cross-file reference resolution (palettes in sprites, sprites in maps, instruments in tracks), 4) Error range calculation for correct line/column positioning, 5) Performance optimization with debouncing, large grid skipping, and palette caching. Add extension settings for configurable behavior.",
+			"reasoning": "Building on the syntax highlighting extension, adding diagnostics requires implementing validation logic in TypeScript/JavaScript. The validation rules mirror the Go parsers. Cross-file resolution requires workspace file reading. Performance optimization with debouncing and caching is important for responsiveness. Moderate to moderately-high complexity due to duplicating validation logic and cross-file resolution."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "VS Code Extension: Commands, Snippets, and CLI Integration",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Break down into: 1) Command implementations (Build All, Build Type, Validate, Preview, Init), 2) Terminal integration running CLI commands with focus handling, 3) Snippet definitions for all file types (rfpal, rfsprite, rfanim, rfmap, rfinst, rfsfx, rftrack, rfpat), 4) CLI path configuration with existence check and helpful errors. Bundle with webpack/esbuild for publishing.",
+			"reasoning": "This is primarily integration work. Commands execute CLI in terminal - straightforward VS Code API usage. Snippets are declarative JSON. CLI path configuration is a simple setting. Bundling for publish is documented. Lower complexity compared to syntax highlighting and diagnostics. The main work is writing the snippets for each file type."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Usage Documentation Suite",
+			"complexityScore": 5,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) Getting started guide (installation, quickstart, project layout), 2) Format reference with complete schemas for all file types, 3) Authoring guides (sprite, map, audio) with examples and best practices, 4) Ebitengine integration guide with complete buildable main.go example, 5) AI workflow documentation (MCP setup, conversation patterns, CLAUDE.md agent context). Ensure all examples are buildable and tested.",
+			"reasoning": "Documentation writing is conceptually simple but time-consuming. The challenge is ensuring accuracy, completeness, and that all examples actually work. The ebitengine integration guide with a complete game example requires writing and testing real code. CLAUDE.md for agent context needs careful curation. Moderate complexity due to scope and need for accuracy."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Demo Assets and Acceptance Test Suite",
+			"complexityScore": 6,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Break down into: 1) Demo palette and sprite files (default.palette, player.sprite, tiles.sprite, enemies.sprite), 2) Demo map file (level1.map with 4 layers and entities), 3) Demo audio files (instruments, SFX, tracks), 4) Test harness verifying all assets build without errors and outputs exist, 5) CI integration with golden file comparison and phase-by-phase acceptance tests. Include visual/audio verification where possible.",
+			"reasoning": "Creating demo assets is straightforward content creation. The test harness needs to verify builds succeed and outputs are correct. Golden file comparison for PNGs and WAVs requires deciding on comparison strategy (checksum, visual diff). Phase-by-phase testing (sprites, previewer, maps, audio, VS Code, docs, MCP) is comprehensive. Moderate to moderately-high complexity due to testing breadth."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Polish and Production Readiness",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down into: 1) Error message improvements with file:line:col references and 'did you mean' suggestions, 2) Performance optimization with parallel compilation and file-level caching (hash-based), 3) Edge case handling (UTF-8 validation, permissions, circular references, large maps/grids), 4) CLI polish (progress indicators, --verbose/--quiet/--version/--no-color flags), 5) CI/CD pipeline with GitHub Actions for multi-platform releases, 6) Release preparation (Homebrew tap, VS Code Marketplace publishing, README badges, CHANGELOG). Benchmark with 100+ assets.",
+			"reasoning": "This is a catch-all polish task with many small improvements. Error message improvements with Levenshtein suggestions, parallel compilation with proper synchronization, and hash-based caching all add significant complexity individually. CI/CD for multi-platform releases requires cross-compilation. The breadth of edge cases and the release process steps make this a higher complexity task despite each piece being relatively small."
+		}
+	]
+}
