@@ -1,0 +1,60 @@
+{
+  "scopeName": "source.runefact.palette",
+  "name": "Runefact Palette",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#sections" },
+    { "include": "#hex-colors" },
+    { "include": "#strings" },
+    { "include": "#keys" },
+    { "include": "#values" }
+  ],
+  "repository": {
+    "comments": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.runefact"
+    },
+    "sections": {
+      "match": "^\\s*(\\[\\[?[\\w.]+\\]\\]?)",
+      "captures": {
+        "1": { "name": "entity.name.section.runefact" }
+      }
+    },
+    "hex-colors": {
+      "match": "(\")(#[0-9a-fA-F]{3,8})(\")",
+      "captures": {
+        "1": { "name": "punctuation.definition.string.begin.runefact" },
+        "2": { "name": "constant.other.color.hex.runefact" },
+        "3": { "name": "punctuation.definition.string.end.runefact" }
+      }
+    },
+    "strings": {
+      "begin": "\"\"\"",
+      "end": "\"\"\"",
+      "name": "string.quoted.triple.runefact"
+    },
+    "keys": {
+      "match": "^\\s*([\\w_]+)\\s*=",
+      "captures": {
+        "1": { "name": "variable.other.key.runefact" }
+      }
+    },
+    "values": {
+      "patterns": [
+        {
+          "match": "\\b(true|false)\\b",
+          "name": "constant.language.boolean.runefact"
+        },
+        {
+          "match": "\\b\\d+(\\.\\d+)?\\b",
+          "name": "constant.numeric.runefact"
+        },
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.runefact"
+        }
+      ]
+    }
+  }
+}

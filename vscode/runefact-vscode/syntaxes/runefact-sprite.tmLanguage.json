@@ -1,0 +1,83 @@
+{
+  "scopeName": "source.runefact.sprite",
+  "name": "Runefact Sprite",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#sections" },
+    { "include": "#pixel-grid" },
+    { "include": "#hex-colors" },
+    { "include": "#strings" },
+    { "include": "#keywords" },
+    { "include": "#keys" },
+    { "include": "#values" }
+  ],
+  "repository": {
+    "comments": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.runefact"
+    },
+    "sections": {
+      "match": "^\\s*(\\[\\[?[\\w.]+\\]\\]?)",
+      "captures": {
+        "1": { "name": "entity.name.section.runefact" }
+      }
+    },
+    "pixel-grid": {
+      "begin": "(pixels)\\s*=\\s*\"\"\"",
+      "end": "\"\"\"",
+      "beginCaptures": {
+        "1": { "name": "variable.other.key.runefact" }
+      },
+      "contentName": "string.unquoted.pixel-grid.runefact",
+      "patterns": [
+        {
+          "match": "--",
+          "name": "keyword.control.frame-separator.runefact"
+        },
+        {
+          "match": "\\[[\\w]+\\]",
+          "name": "entity.other.bracket-key.runefact"
+        },
+        {
+          "match": "_",
+          "name": "constant.other.transparent.runefact"
+        }
+      ]
+    },
+    "hex-colors": {
+      "match": "(\")(#[0-9a-fA-F]{3,8})(\")",
+      "captures": {
+        "1": { "name": "punctuation.definition.string.begin.runefact" },
+        "2": { "name": "constant.other.color.hex.runefact" },
+        "3": { "name": "punctuation.definition.string.end.runefact" }
+      }
+    },
+    "strings": {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double.runefact"
+    },
+    "keywords": {
+      "match": "\\b(palette|grid|framerate|frame_count)\\b",
+      "name": "keyword.other.runefact"
+    },
+    "keys": {
+      "match": "^\\s*([\\w_]+)\\s*=",
+      "captures": {
+        "1": { "name": "variable.other.key.runefact" }
+      }
+    },
+    "values": {
+      "patterns": [
+        {
+          "match": "\\b(true|false)\\b",
+          "name": "constant.language.boolean.runefact"
+        },
+        {
+          "match": "\\b\\d+(\\.\\d+)?\\b",
+          "name": "constant.numeric.runefact"
+        }
+      ]
+    }
+  }
+}

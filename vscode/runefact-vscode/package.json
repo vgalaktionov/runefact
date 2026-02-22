@@ -1,0 +1,212 @@
+{
+  "name": "runefact",
+  "displayName": "Runefact",
+  "description": "Syntax highlighting, color decorators, and diagnostics for Runefact game asset files",
+  "version": "0.1.0",
+  "publisher": "vgalaktionov",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:runefact-palette",
+    "onLanguage:runefact-sprite",
+    "onLanguage:runefact-map",
+    "onLanguage:runefact-instrument",
+    "onLanguage:runefact-sfx",
+    "onLanguage:runefact-track"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "runefact-palette",
+        "extensions": [
+          ".palette"
+        ],
+        "aliases": [
+          "Runefact Palette",
+          "palette"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "runefact-sprite",
+        "extensions": [
+          ".sprite"
+        ],
+        "aliases": [
+          "Runefact Sprite",
+          "sprite"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "runefact-map",
+        "extensions": [
+          ".map"
+        ],
+        "aliases": [
+          "Runefact Map",
+          "map"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "runefact-instrument",
+        "extensions": [
+          ".inst"
+        ],
+        "aliases": [
+          "Runefact Instrument",
+          "instrument"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "runefact-sfx",
+        "extensions": [
+          ".sfx"
+        ],
+        "aliases": [
+          "Runefact SFX",
+          "sfx"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "runefact-track",
+        "extensions": [
+          ".track"
+        ],
+        "aliases": [
+          "Runefact Track",
+          "track"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "configuration": {
+      "title": "Runefact",
+      "properties": {
+        "runefact.autoValidateOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically validate Runefact files on save"
+        },
+        "runefact.colorDecorators": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline color decorators for hex colors in palette files"
+        },
+        "runefact.pixelGridColors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Colorize pixel grid characters based on palette colors"
+        },
+        "runefact.tracker.chromaticColors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Colorize notes in tracker data blocks by pitch class"
+        },
+        "runefact.cliPath": {
+          "type": "string",
+          "default": "runefact",
+          "description": "Path to the Runefact CLI executable"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "runefact.buildAll",
+        "title": "Runefact: Build All"
+      },
+      {
+        "command": "runefact.buildType",
+        "title": "Runefact: Build Current File Type"
+      },
+      {
+        "command": "runefact.validate",
+        "title": "Runefact: Validate"
+      },
+      {
+        "command": "runefact.previewFile",
+        "title": "Runefact: Preview Current File"
+      },
+      {
+        "command": "runefact.openPreviewer",
+        "title": "Runefact: Open Previewer"
+      },
+      {
+        "command": "runefact.init",
+        "title": "Runefact: Initialize Project"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "runefact.buildAll",
+        "key": "ctrl+shift+b",
+        "when": "resourceLangId =~ /^runefact-/"
+      },
+      {
+        "command": "runefact.previewFile",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "resourceLangId =~ /^runefact-/ && editorFocus"
+      }
+    ],
+    "snippets": [
+      {
+        "path": "./snippets/runefact.code-snippets"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "runefact-palette",
+        "scopeName": "source.runefact.palette",
+        "path": "./syntaxes/runefact-palette.tmLanguage.json"
+      },
+      {
+        "language": "runefact-sprite",
+        "scopeName": "source.runefact.sprite",
+        "path": "./syntaxes/runefact-sprite.tmLanguage.json"
+      },
+      {
+        "language": "runefact-map",
+        "scopeName": "source.runefact.map",
+        "path": "./syntaxes/runefact-map.tmLanguage.json"
+      },
+      {
+        "language": "runefact-instrument",
+        "scopeName": "source.runefact.instrument",
+        "path": "./syntaxes/runefact-instrument.tmLanguage.json"
+      },
+      {
+        "language": "runefact-sfx",
+        "scopeName": "source.runefact.sfx",
+        "path": "./syntaxes/runefact-sfx.tmLanguage.json"
+      },
+      {
+        "language": "runefact-track",
+        "scopeName": "source.runefact.track",
+        "path": "./syntaxes/runefact-track.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "bundle": "node esbuild.mjs",
+    "package": "node esbuild.mjs --production",
+    "vsix": "npx @vscode/vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.27.3",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "scopeName": "source.runefact.sfx",
+  "name": "Runefact SFX",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#sections" },
+    { "include": "#waveforms" },
+    { "include": "#curves" },
+    { "include": "#strings" },
+    { "include": "#keywords" },
+    { "include": "#keys" },
+    { "include": "#values" }
+  ],
+  "repository": {
+    "comments": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.runefact"
+    },
+    "sections": {
+      "match": "^\\s*(\\[\\[?[\\w.]+\\]\\]?)",
+      "captures": {
+        "1": { "name": "entity.name.section.runefact" }
+      }
+    },
+    "waveforms": {
+      "match": "\"(sine|square|triangle|sawtooth|noise|pulse)\"",
+      "name": "support.constant.waveform.runefact"
+    },
+    "curves": {
+      "match": "\"(linear|exponential|logarithmic)\"",
+      "name": "support.constant.curve.runefact"
+    },
+    "strings": {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double.runefact"
+    },
+    "keywords": {
+      "match": "\\b(duration|volume|attack|decay|sustain|release|start|end|curve|cutoff|resonance|waveform|vibrato_depth|vibrato_rate)\\b",
+      "name": "keyword.other.runefact"
+    },
+    "keys": {
+      "match": "^\\s*([\\w_]+)\\s*=",
+      "captures": {
+        "1": { "name": "variable.other.key.runefact" }
+      }
+    },
+    "values": {
+      "patterns": [
+        {
+          "match": "\\b(true|false)\\b",
+          "name": "constant.language.boolean.runefact"
+        },
+        {
+          "match": "\\b\\d+(\\.\\d+)?\\b",
+          "name": "constant.numeric.runefact"
+        }
+      ]
+    }
+  }
+}

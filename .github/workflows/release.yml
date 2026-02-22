@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ''
+          - os: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ''
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install X11 headers (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev libgl-dev libxrandr-dev libxxf86vm-dev libxi-dev libxcursor-dev libxinerama-dev libasound2-dev
+
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '1'
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          go build -ldflags="-s -w -X main.version=${VERSION}" -o runefact${{ matrix.ext }} ./cmd/runefact
+
+      - name: Package (Unix)
+        if: matrix.goos != 'windows'
+        run: |
+          tar czf runefact-${GITHUB_REF_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz runefact README.md LICENSE
+
+      - name: Package (Windows)
+        if: matrix.goos == 'windows'
+        shell: bash
+        run: |
+          7z a runefact-${GITHUB_REF_NAME}-${{ matrix.goos }}-${{ matrix.goarch }}.zip runefact.exe README.md LICENSE
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runefact-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: runefact-*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Generate checksums
+        run: sha256sum runefact-* > checksums.txt
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            runefact-*
+            checksums.txt
+          generate_release_notes: true
+          draft: true

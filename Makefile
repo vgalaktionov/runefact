@@ -1,10 +1,13 @@
 BINARY := runefact
 BUILD_DIR := bin
 
-.PHONY: build run test lint vet clean
+.PHONY: build install run test lint vet clean
 
 build:
 	go build -o $(BUILD_DIR)/$(BINARY) ./cmd/runefact
+
+install:
+	go install ./cmd/runefact
 
 run:
 	go run ./cmd/runefact $(ARGS)

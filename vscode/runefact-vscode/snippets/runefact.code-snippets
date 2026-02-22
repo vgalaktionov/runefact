@@ -1,0 +1,150 @@
+{
+  "rfpal": {
+    "prefix": "rfpal",
+    "scope": "runefact-palette",
+    "body": [
+      "[colors]",
+      "${1:a} = \"${2:#ff0000}\"",
+      "${3:b} = \"${4:#00ff00}\"",
+      "${5:c} = \"${6:#0000ff}\"",
+      ""
+    ],
+    "description": "New palette file with sample colors"
+  },
+  "rfsprite": {
+    "prefix": "rfsprite",
+    "scope": "runefact-sprite",
+    "body": [
+      "palette = \"${1:default}\"",
+      "grid = ${2:16}",
+      "",
+      "[sprite.${3:name}]",
+      "pixels = \"\"\"",
+      "${4:________________}",
+      "${5:________________}",
+      "\"\"\""
+    ],
+    "description": "New static sprite definition"
+  },
+  "rfanim": {
+    "prefix": "rfanim",
+    "scope": "runefact-sprite",
+    "body": [
+      "palette = \"${1:default}\"",
+      "grid = ${2:16}",
+      "",
+      "[sprite.${3:name}]",
+      "frames = ${4:2}",
+      "duration = ${5:200}",
+      "pixels = \"\"\"",
+      "${6:________________}",
+      "${7:________________}",
+      "--",
+      "${8:________________}",
+      "${9:________________}",
+      "\"\"\""
+    ],
+    "description": "New animated sprite with 2 frames"
+  },
+  "rfframe": {
+    "prefix": "rfframe",
+    "scope": "runefact-sprite",
+    "body": [
+      "--",
+      "${1:________________}",
+      "${2:________________}"
+    ],
+    "description": "Additional animation frame"
+  },
+  "rfmap": {
+    "prefix": "rfmap",
+    "scope": "runefact-map",
+    "body": [
+      "tile_size = ${1:16}",
+      "",
+      "[tileset]",
+      "${2:g} = \"${3:sprites:grass}\"",
+      "${4:w} = \"${5:sprites:wall}\"",
+      "",
+      "[layer.${6:ground}]",
+      "pixels = \"\"\"",
+      "${7:gggggggg}",
+      "${8:gggggggg}",
+      "\"\"\""
+    ],
+    "description": "New map file with tileset and layer"
+  },
+  "rfinst": {
+    "prefix": "rfinst",
+    "scope": "runefact-instrument",
+    "body": [
+      "[oscillator]",
+      "waveform = \"${1|square,sine,triangle,sawtooth,noise|}\"",
+      "duty = ${2:0.5}",
+      "",
+      "[envelope]",
+      "attack = ${3:0.01}",
+      "decay = ${4:0.1}",
+      "sustain = ${5:0.7}",
+      "release = ${6:0.2}"
+    ],
+    "description": "New instrument definition"
+  },
+  "rfsfx": {
+    "prefix": "rfsfx",
+    "scope": "runefact-sfx",
+    "body": [
+      "duration = ${1:0.5}",
+      "",
+      "[[voice]]",
+      "waveform = \"${2|square,sine,triangle,sawtooth,noise|}\"",
+      "frequency = ${3:440}",
+      "volume = ${4:0.8}",
+      "",
+      "[voice.envelope]",
+      "attack = ${5:0.01}",
+      "decay = ${6:0.1}",
+      "sustain = ${7:0.5}",
+      "release = ${8:0.2}"
+    ],
+    "description": "New sound effect with one voice"
+  },
+  "rftrack": {
+    "prefix": "rftrack",
+    "scope": "runefact-track",
+    "body": [
+      "tempo = ${1:120}",
+      "",
+      "[[channel]]",
+      "instrument = \"${2:lead}\"",
+      "",
+      "[[channel]]",
+      "instrument = \"${3:bass}\"",
+      "",
+      "[pattern.${4:intro}]",
+      "data = \"\"\"",
+      "${5:C4  C3}",
+      "${6:E4  C3}",
+      "${7:G4  E3}",
+      "${8:C5  G3}",
+      "\"\"\"",
+      "",
+      "sequence = [\"${4:intro}\"]"
+    ],
+    "description": "New track with 2 channels and 1 pattern"
+  },
+  "rfpat": {
+    "prefix": "rfpat",
+    "scope": "runefact-track",
+    "body": [
+      "[pattern.${1:name}]",
+      "data = \"\"\"",
+      "${2:C4  C3}",
+      "${3:E4  C3}",
+      "${4:G4  E3}",
+      "${5:C5  G3}",
+      "\"\"\""
+    ],
+    "description": "Additional pattern block"
+  }
+}

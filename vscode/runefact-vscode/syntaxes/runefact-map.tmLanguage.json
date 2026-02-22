@@ -1,0 +1,70 @@
+{
+  "scopeName": "source.runefact.map",
+  "name": "Runefact Map",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#sections" },
+    { "include": "#pixel-grid" },
+    { "include": "#strings" },
+    { "include": "#keywords" },
+    { "include": "#keys" },
+    { "include": "#values" }
+  ],
+  "repository": {
+    "comments": {
+      "match": "#.*$",
+      "name": "comment.line.number-sign.runefact"
+    },
+    "sections": {
+      "match": "^\\s*(\\[\\[?[\\w.]+\\]\\]?)",
+      "captures": {
+        "1": { "name": "entity.name.section.runefact" }
+      }
+    },
+    "pixel-grid": {
+      "begin": "(pixels)\\s*=\\s*\"\"\"",
+      "end": "\"\"\"",
+      "beginCaptures": {
+        "1": { "name": "variable.other.key.runefact" }
+      },
+      "contentName": "string.unquoted.pixel-grid.runefact",
+      "patterns": [
+        {
+          "match": "\\[[\\w]+\\]",
+          "name": "entity.other.bracket-key.runefact"
+        },
+        {
+          "match": "_",
+          "name": "constant.other.transparent.runefact"
+        }
+      ]
+    },
+    "strings": {
+      "begin": "\"",
+      "end": "\"",
+      "name": "string.quoted.double.runefact"
+    },
+    "keywords": {
+      "match": "\\b(tile_size|type|scroll_x|scroll_y)\\b",
+      "name": "keyword.other.runefact"
+    },
+    "keys": {
+      "match": "^\\s*([\\w_]+)\\s*=",
+      "captures": {
+        "1": { "name": "variable.other.key.runefact" }
+      }
+    },
+    "values": {
+      "patterns": [
+        {
+          "match": "\\b(true|false)\\b",
+          "name": "constant.language.boolean.runefact"
+        },
+        {
+          "match": "\\b\\d+(\\.\\d+)?\\b",
+          "name": "constant.numeric.runefact"
+        }
+      ]
+    }
+  }
+}

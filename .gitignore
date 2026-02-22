@@ -54,4 +54,14 @@ node_modules/
 
 # Task files
 # tasks.json
-# tasks/ 
+# tasks/
+
+# VS Code extension build output
+vscode/runefact-vscode/out/
+vscode/runefact-vscode/dist/
+
+# Build cache
+.runefact-cache.json
+
+# Build output
+/build/
