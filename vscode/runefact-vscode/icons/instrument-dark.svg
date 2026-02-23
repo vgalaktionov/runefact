@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <!-- Synthesizer waveform -->
+  <rect x="1" y="7" width="2" height="2" fill="#9b7ec8"/>
+  <rect x="3" y="5" width="1" height="2" fill="#9b7ec8"/>
+  <rect x="4" y="3" width="2" height="2" fill="#9b7ec8"/>
+  <rect x="6" y="5" width="1" height="2" fill="#9b7ec8"/>
+  <rect x="7" y="7" width="2" height="2" fill="#9b7ec8"/>
+  <rect x="9" y="9" width="1" height="2" fill="#9b7ec8"/>
+  <rect x="10" y="11" width="2" height="2" fill="#9b7ec8"/>
+  <rect x="12" y="9" width="1" height="2" fill="#9b7ec8"/>
+  <rect x="13" y="7" width="2" height="2" fill="#9b7ec8"/>
+  <!-- Knobs -->
+  <rect x="2" y="1" width="2" height="2" rx="1" fill="#ffad75"/>
+  <rect x="7" y="1" width="2" height="2" rx="1" fill="#ffad75"/>
+  <rect x="12" y="1" width="2" height="2" rx="1" fill="#ffad75"/>
+</svg>

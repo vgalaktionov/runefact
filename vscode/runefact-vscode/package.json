@@ -30,6 +30,10 @@
           "Runefact Palette",
           "palette"
         ],
+        "icon": {
+          "light": "./icons/palette-light.svg",
+          "dark": "./icons/palette-dark.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
@@ -41,6 +45,10 @@
           "Runefact Sprite",
           "sprite"
         ],
+        "icon": {
+          "light": "./icons/sprite-light.svg",
+          "dark": "./icons/sprite-dark.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
@@ -52,6 +60,10 @@
           "Runefact Map",
           "map"
         ],
+        "icon": {
+          "light": "./icons/map-light.svg",
+          "dark": "./icons/map-dark.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
@@ -63,6 +75,10 @@
           "Runefact Instrument",
           "instrument"
         ],
+        "icon": {
+          "light": "./icons/instrument-light.svg",
+          "dark": "./icons/instrument-dark.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
@@ -74,6 +90,10 @@
           "Runefact SFX",
           "sfx"
         ],
+        "icon": {
+          "light": "./icons/sfx-light.svg",
+          "dark": "./icons/sfx-dark.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
@@ -85,6 +105,10 @@
           "Runefact Track",
           "track"
         ],
+        "icon": {
+          "light": "./icons/track-light.svg",
+          "dark": "./icons/track-dark.svg"
+        },
         "configuration": "./language-configuration.json"
       }
     ],
