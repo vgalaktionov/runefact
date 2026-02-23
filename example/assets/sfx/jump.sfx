@@ -1,0 +1,17 @@
+duration = 0.2
+volume = 0.7
+
+[[voice]]
+waveform = "square"
+duty_cycle = 0.5
+
+[voice.envelope]
+attack = 0.0
+decay = 0.08
+sustain = 0.2
+release = 0.12
+
+[voice.pitch]
+start = 220
+end = 660
+curve = "exponential"

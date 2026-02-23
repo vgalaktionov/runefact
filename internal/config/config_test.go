@@ -65,8 +65,8 @@ name = "minimal"
 	if cfg.Defaults.BitDepth != 16 {
 		t.Errorf("default bit_depth = %d, want 16", cfg.Defaults.BitDepth)
 	}
-	if cfg.Preview.WindowWidth != 800 {
-		t.Errorf("default window_width = %d, want 800", cfg.Preview.WindowWidth)
+	if cfg.Preview.WindowWidth != 1200 {
+		t.Errorf("default window_width = %d, want 1200", cfg.Preview.WindowWidth)
 	}
 	if cfg.Preview.PixelScale != 4 {
 		t.Errorf("default pixel_scale = %d, want 4", cfg.Preview.PixelScale)

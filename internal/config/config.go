@@ -77,10 +77,10 @@ func applyDefaults(cfg *ProjectConfig) {
 		cfg.Defaults.BitDepth = 16
 	}
 	if cfg.Preview.WindowWidth == 0 {
-		cfg.Preview.WindowWidth = 800
+		cfg.Preview.WindowWidth = 1200
 	}
 	if cfg.Preview.WindowHeight == 0 {
-		cfg.Preview.WindowHeight = 600
+		cfg.Preview.WindowHeight = 900
 	}
 	if cfg.Preview.Background == "" {
 		cfg.Preview.Background = "#1a1a2e"

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/vgalaktionov/runefact/internal/preview"
@@ -29,30 +30,36 @@ Examples:
 		}
 
 		file := args[0]
-		ext := filepath.Ext(file)
 
-		// Resolve to full path based on file type.
+		// Resolve to absolute path.
 		var fullPath string
-		switch ext {
-		case ".sprite":
-			fullPath = filepath.Join(root, "assets", "sprites", file)
-		case ".map":
-			fullPath = filepath.Join(root, "assets", "maps", file)
-		case ".sfx":
-			fullPath = filepath.Join(root, "assets", "sfx", file)
-		case ".track":
-			fullPath = filepath.Join(root, "assets", "tracks", file)
-		case ".palette":
-			fullPath = filepath.Join(root, "assets", "palettes", file)
-		case ".inst":
-			fullPath = filepath.Join(root, "assets", "instruments", file)
-		default:
-			fullPath = filepath.Join(root, "assets", file)
-		}
-
-		// If the arg is already an absolute path, use it directly.
 		if filepath.IsAbs(file) {
 			fullPath = file
+		} else {
+			// Try the path as given (relative to cwd) first.
+			abs, _ := filepath.Abs(file)
+			if _, err := os.Stat(abs); err == nil {
+				fullPath = abs
+			} else {
+				// Fall back: treat as bare filename and look in the type-specific dir.
+				ext := filepath.Ext(file)
+				switch ext {
+				case ".sprite":
+					fullPath = filepath.Join(root, "assets", "sprites", file)
+				case ".map":
+					fullPath = filepath.Join(root, "assets", "maps", file)
+				case ".sfx":
+					fullPath = filepath.Join(root, "assets", "sfx", file)
+				case ".track":
+					fullPath = filepath.Join(root, "assets", "tracks", file)
+				case ".palette":
+					fullPath = filepath.Join(root, "assets", "palettes", file)
+				case ".inst":
+					fullPath = filepath.Join(root, "assets", "instruments", file)
+				default:
+					fullPath = filepath.Join(root, "assets", file)
+				}
+			}
 		}
 
 		assetsDir := filepath.Join(root, "assets")

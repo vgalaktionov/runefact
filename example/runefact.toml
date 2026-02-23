@@ -1,0 +1,16 @@
+[project]
+name = "example"
+output = "build/assets"
+package = "assets"
+
+[defaults]
+sprite_size = 16
+sample_rate = 44100
+bit_depth = 16
+
+[preview]
+window_width = 1200
+window_height = 900
+background = "#1a1a2e"
+pixel_scale = 4
+audio_volume = 0.5

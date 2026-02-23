@@ -51,6 +51,8 @@ Set `cwd` to your project root (where `runefact.toml` lives).
 | `runefact_list_assets` | List all asset files, optionally by type |
 | `runefact_palette_colors` | Get resolved colors for a palette |
 | `runefact_format_help` | Get format documentation |
+| `runefact_preview_map` | Render a map as an inline PNG image |
+| `runefact_preview_sprite` | Render a sprite sheet as an inline PNG image |
 
 ## Available MCP Resources
 
@@ -67,12 +69,12 @@ Set `cwd` to your project root (where `runefact.toml` lives).
 User: Create a 16x16 player character sprite with idle animation
 
 Agent workflow:
-1. runefact_list_assets(type: "palette")     → find available palettes
-2. runefact_palette_colors(file: "default")  → see color options
+1. runefact_list_assets(type: "palette")        → find available palettes
+2. runefact_palette_colors(file: "default")     → see color options
 3. Write assets/sprites/player.sprite
-4. runefact_validate(files: ["player.sprite"]) → check for errors
-5. runefact_build(scope: "sprites")           → generate PNG
-6. runefact_inspect_sprite(file: "player")    → verify output
+4. runefact_validate(files: ["player.sprite"])   → check for errors
+5. runefact_build(scope: "sprites")              → generate PNG
+6. runefact_preview_sprite(file: "player.sprite") → visually verify the result
 ```
 
 ### Adding Sound Effects
@@ -94,12 +96,12 @@ Agent workflow:
 User: Create a platformer level using the terrain tileset
 
 Agent workflow:
-1. runefact_inspect_sprite(file: "terrain")  → see available tiles
-2. runefact_format_help(format: "map")       → review format
+1. runefact_inspect_sprite(file: "tiles.sprite")  → see available tiles
+2. runefact_format_help(format: "map")             → review format
 3. Write assets/maps/level1.map
 4. runefact_validate(files: ["level1.map"])
 5. runefact_build(scope: "maps")
-6. runefact_inspect_map(file: "level1")      → verify layers/entities
+6. runefact_preview_map(file: "level1.map")        → visually verify the level
 ```
 
 ### Iterating on Assets
@@ -134,12 +136,14 @@ Agent workflow:
 
 2. **Validate after every change** — catch errors immediately rather than discovering them at build time.
 
-3. **Use `format_help` when unsure** — the tool returns complete format documentation, no need to guess syntax.
+3. **Preview to verify** — use `preview_sprite` and `preview_map` to visually verify your work. These return inline PNG images so you can see the actual rendered result without leaving the conversation.
 
-4. **Iterate incrementally** — create a minimal version first, validate it, then add detail. This is especially important for pixel art and audio.
+4. **Use `format_help` when unsure** — the tool returns complete format documentation, no need to guess syntax.
 
-5. **Read the palette** — always check `palette_colors` before writing pixel grids. Using the wrong key produces validation warnings.
+5. **Iterate incrementally** — create a minimal version first, validate it, then add detail. This is especially important for pixel art and audio.
 
-6. **Build scoped** — use `scope: "sprites"` instead of `scope: "all"` when only sprite files changed. It's faster.
+6. **Read the palette** — always check `palette_colors` before writing pixel grids. Using the wrong key produces validation warnings.
 
-7. **Check project status** — the `runefact://project/status` resource shows current config and defaults, useful for knowing sprite sizes and audio sample rates.
+7. **Build scoped** — use `scope: "sprites"` instead of `scope: "all"` when only sprite files changed. It's faster.
+
+8. **Check project status** — the `runefact://project/status` resource shows current config and defaults, useful for knowing sprite sizes and audio sample rates.

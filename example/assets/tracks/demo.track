@@ -1,0 +1,61 @@
+tempo = 140
+ticks_per_beat = 4
+loop = true
+loop_start = 0
+
+[[channel]]
+name = "melody"
+instrument = "lead"
+volume = 0.7
+
+[[channel]]
+name = "bass"
+instrument = "bass"
+volume = 0.6
+
+[pattern.intro]
+ticks = 16
+data = """
+melody  | bass
+C4      | C2
+---     | ---
+E4      | ---
+---     | ---
+G4      | G2
+---     | ---
+E4      | ---
+---     | ---
+A4      | A2
+---     | ---
+G4      | ---
+---     | ---
+E4      | E2
+---     | ---
+D4      | ---
+---     | ---
+"""
+
+[pattern.verse]
+ticks = 16
+data = """
+melody  | bass
+E4      | A2
+---     | ---
+D4      | ---
+---     | ---
+C4      | F2
+---     | ---
+D4      | ---
+---     | ---
+E4      | G2
+---     | ---
+E4      | ---
+---     | ---
+E4      | C2
+---     | ---
+^^^     | ---
+...     | ^^^
+"""
+
+[song]
+sequence = ["intro", "verse", "intro", "verse"]

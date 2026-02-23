@@ -28,56 +28,24 @@ runefact init --name my-game
 This creates:
 
 ```
-runefact.toml           # project configuration
+runefact.toml                      # project configuration
+.mcp.json                          # MCP server config (for Claude Code / Claude Desktop)
+.claude/settings.local.json        # Claude Code permissions for runefact MCP
 assets/
-  palettes/             # color palette definitions
-  sprites/              # sprite sheet definitions
-  maps/                 # tilemap definitions
-  instruments/          # synthesizer instrument definitions
-  sfx/                  # sound effect definitions
-  tracks/               # tracker-style music definitions
+  palettes/default.palette         # PICO-8-style 16-color palette
+  sprites/player.sprite            # player character with idle animation + coin + heart
+  sprites/tiles.sprite             # terrain tiles (grass, dirt, stone, sky)
+  maps/level1.map                  # platformer level with background, tiles, and entities
+  instruments/lead.inst            # square-wave lead synth
+  instruments/bass.inst            # triangle-wave bass synth
+  sfx/jump.sfx                     # jump sound effect
+  sfx/coin.sfx                     # coin pickup sound effect
+  tracks/demo.track                # two-channel music track (intro + verse)
 ```
 
-### 2. Create a palette
+The scaffold includes complete example assets so you can immediately build and preview.
 
-Create `assets/palettes/default.palette`:
-
-```toml
-name = "default"
-
-[colors]
-_ = "transparent"
-k = "#1a1c2c"
-p = "#b13e53"
-o = "#ef7d57"
-y = "#ffcd75"
-g = "#38b764"
-b = "#29366f"
-w = "#f4f4f4"
-```
-
-### 3. Create a sprite
-
-Create `assets/sprites/player.sprite`:
-
-```toml
-palette = "default"
-grid = 8
-
-[sprite.idle]
-pixels = """
-__pp__
-_pppp_
-_kppk_
-pppppp
-_pppp_
-__pp__
-_p__p_
-_k__k_
-"""
-```
-
-### 4. Build
+### 2. Build
 
 ```bash
 runefact build
@@ -85,16 +53,28 @@ runefact build
 
 Output goes to `build/assets/` by default:
 
-- `sprites/player.png` — sprite sheet PNG
+- `sprites/player.png` — sprite sheet PNG (all frames packed)
+- `sprites/tiles.png` — terrain tile sprites
+- `maps/level1.json` — tilemap JSON
+- `audio/jump.wav`, `audio/coin.wav` — sound effects
+- `audio/demo.wav` — music track
 - `manifest.go` — type-safe Go asset loader
 
-### 5. Preview
+### 3. Preview
 
 ```bash
 runefact preview assets/sprites/player.sprite
+runefact preview assets/maps/level1.map
+runefact preview assets/sfx/jump.sfx
+runefact preview assets/tracks/demo.track
 ```
 
-Opens a live-reloading window. Edit the `.sprite` file and watch changes appear instantly.
+Opens a live-reloading window. Edit the rune file and watch changes appear instantly.
+
+- **Sprites**: auto-zoom grid, click to isolate, arrow keys to navigate frames
+- **Maps**: renders actual tile sprites, shows entities, mouse drag to pan, scroll to zoom
+- **SFX**: waveform + envelope + pitch graphs, press Enter to play
+- **Music**: tracker-style note display with waveform, press Enter to play
 
 ### 6. Validate
 
@@ -127,9 +107,11 @@ sample_rate = 44100       # audio sample rate
 bit_depth = 16            # audio bit depth
 
 [preview]
-width = 640               # preview window width
-height = 480              # preview window height
-scale = 2                 # pixel scaling factor
+window_width = 1200       # preview window width
+window_height = 900       # preview window height
+background = "#1a1a2e"    # preview background color
+pixel_scale = 4           # pixel scaling factor
+audio_volume = 0.5        # preview audio volume (0.0-1.0)
 ```
 
 ## CLI Reference

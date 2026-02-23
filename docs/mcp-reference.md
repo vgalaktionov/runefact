@@ -196,6 +196,52 @@ Get documentation for a rune asset format.
 
 ---
 
+### runefact_preview_map
+
+Render a map file as a PNG image and return it inline. Use this to visually inspect map layouts, tile art, and entity placement.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `file` | string | yes | Map file name (e.g., `"level1.map"`) |
+| `scale` | integer | no | Pixel scale factor (default: 2, max: 8) |
+
+**Example:**
+```json
+{
+  "name": "runefact_preview_map",
+  "arguments": { "file": "level1.map", "scale": 3 }
+}
+```
+
+**Returns:** Inline PNG image with tile sprites rendered at the given scale. Entities with `sprite` properties are rendered using their referenced sprite; others show a colored diamond marker.
+
+---
+
+### runefact_preview_sprite
+
+Render a sprite file as a PNG image and return it inline. Shows all sprites with all animation frames laid out in a grid.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `file` | string | yes | Sprite file name (e.g., `"player.sprite"`) |
+| `scale` | integer | no | Pixel scale factor (default: 4, max: 16) |
+
+**Example:**
+```json
+{
+  "name": "runefact_preview_sprite",
+  "arguments": { "file": "player.sprite", "scale": 6 }
+}
+```
+
+**Returns:** Inline PNG image with each sprite on its own row and frames laid out horizontally. Transparent areas show a checkerboard pattern.
+
+---
+
 ## Resources
 
 ### runefact://project/status

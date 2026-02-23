@@ -1,0 +1,74 @@
+tile_size = 16
+
+[tileset]
+_ = ""
+g = "tiles:grass"
+d = "tiles:dirt"
+s = "tiles:stone"
+b = "tiles:sky"
+
+[layer.background]
+scroll_x = 0.5
+pixels = """
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+"""
+
+[layer.main]
+pixels = """
+________________
+________________
+________________
+________________
+_______sss______
+________________
+__gg_______gg___
+__dd_______dd___
+gggggggggggggggg
+dddddddddddddddd
+"""
+
+[layer.entities]
+
+[[layer.entities.entity]]
+type = "spawn"
+x = 2
+y = 7
+[layer.entities.entity.properties]
+sprite = "player:idle"
+
+[[layer.entities.entity]]
+type = "coin"
+x = 4
+y = 5
+[layer.entities.entity.properties]
+sprite = "player:coin"
+
+[[layer.entities.entity]]
+type = "coin"
+x = 8
+y = 3
+[layer.entities.entity.properties]
+sprite = "player:coin"
+
+[[layer.entities.entity]]
+type = "coin"
+x = 11
+y = 5
+[layer.entities.entity.properties]
+sprite = "player:coin"
+
+[[layer.entities.entity]]
+type = "enemy"
+x = 13
+y = 7
+[layer.entities.entity.properties]
+sprite = "player:heart"

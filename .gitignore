@@ -65,3 +65,4 @@ vscode/runefact-vscode/dist/
 
 # Build output
 /build/
+example/build/

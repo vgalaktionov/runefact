@@ -1,12 +1,15 @@
 package preview
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
 	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/vgalaktionov/runefact/internal/sfx"
 )
@@ -15,7 +18,11 @@ import (
 type SFXPreviewState struct {
 	sfxDef     *sfx.SFX
 	waveform   []float64 // downsampled waveform for display
+	samples    []float64 // raw rendered samples for playback
 	sampleRate int
+	audioCtx   *audio.Context
+	player     *audio.Player
+	audioErr   string // non-empty if audio init failed
 }
 
 func (p *Previewer) initSFXState(s *sfx.SFX, sampleRate int) {
@@ -28,8 +35,60 @@ func (p *Previewer) initSFXState(s *sfx.SFX, sampleRate int) {
 	p.sfxState = &SFXPreviewState{
 		sfxDef:     s,
 		waveform:   waveform,
+		samples:    samples,
 		sampleRate: sampleRate,
 	}
+}
+
+func (p *Previewer) updateSFX() {
+	if p.sfxState == nil {
+		return
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		p.sfxState.play()
+	}
+}
+
+func (ss *SFXPreviewState) ensureAudio() {
+	if ss.audioCtx != nil || ss.audioErr != "" {
+		return
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			ss.audioErr = fmt.Sprintf("%v", r)
+		}
+	}()
+	ss.audioCtx = audio.NewContext(ss.sampleRate)
+}
+
+func (ss *SFXPreviewState) play() {
+	ss.ensureAudio()
+	if ss.audioErr != "" || ss.audioCtx == nil {
+		return
+	}
+
+	// Convert float64 samples to 16-bit stereo PCM.
+	buf := &bytes.Buffer{}
+	for _, s := range ss.samples {
+		// Clamp.
+		if s > 1.0 {
+			s = 1.0
+		} else if s < -1.0 {
+			s = -1.0
+		}
+		v := int16(s * 32767)
+		binary.Write(buf, binary.LittleEndian, v) // left
+		binary.Write(buf, binary.LittleEndian, v) // right
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			ss.audioErr = fmt.Sprintf("%v", r)
+		}
+	}()
+	player := ss.audioCtx.NewPlayerFromBytes(buf.Bytes())
+	player.Play()
+	ss.player = player // prevent GC
 }
 
 func downsampleWaveform(samples []float64, width int) []float64 {
@@ -67,9 +126,12 @@ func (p *Previewer) drawSFX(screen *ebiten.Image) {
 		return
 	}
 
+	lineH := scaledCharH()
+
 	// Waveform area: top 60%.
+	topMargin := lineH + 10
 	waveH := int(float64(p.winH) * 0.6)
-	midY := waveH / 2
+	midY := topMargin + (waveH-topMargin)/2
 	offsetX := 50
 
 	// Draw zero line.
@@ -99,7 +161,7 @@ func (p *Previewer) drawSFX(screen *ebiten.Image) {
 
 	// Envelope graph: bottom 40%, left half.
 	graphY := waveH + 10
-	graphH := p.winH - graphY - 30
+	graphH := p.winH - graphY - lineH - 20
 	envColor := color.RGBA{R: 0x00, G: 0xcc, B: 0x00, A: 0xff}
 
 	if len(ss.sfxDef.Voices) > 0 {
@@ -115,7 +177,7 @@ func (p *Previewer) drawSFX(screen *ebiten.Image) {
 			py := graphY + graphH - h
 			screen.Set(offsetX+x, py, envColor)
 		}
-		ebitenutil.DebugPrintAt(screen, "Envelope", offsetX, graphY-12)
+		drawText(screen, "Envelope", offsetX, graphY-lineH-2)
 
 		// Pitch curve: bottom 40%, right half.
 		pitchColor := color.RGBA{R: 0xff, G: 0x99, B: 0x00, A: 0xff}
@@ -132,15 +194,20 @@ func (p *Previewer) drawSFX(screen *ebiten.Image) {
 				py := graphY + graphH - h
 				screen.Set(pitchX+x, py, pitchColor)
 			}
-			ebitenutil.DebugPrintAt(screen, "Pitch", pitchX, graphY-12)
+			drawText(screen, "Pitch", pitchX, graphY-lineH-2)
 		}
 	}
 
 	// Info.
 	info := fmt.Sprintf("SFX  dur:%.2fs  voices:%d  rate:%dHz",
 		ss.sfxDef.Duration, len(ss.sfxDef.Voices), ss.sampleRate)
-	ebitenutil.DebugPrintAt(screen, info, 10, 10)
-	ebitenutil.DebugPrintAt(screen, "Press Enter to play (not implemented in headless)", 10, p.winH-16)
+	drawText(screen, info, 10, 10)
+	statusY := p.winH - lineH - 6
+	if ss.audioErr != "" {
+		drawText(screen, "No audio device available", 10, statusY)
+	} else {
+		drawText(screen, "Press Enter to play", 10, statusY)
+	}
 }
 
 // adsrLevel computes ADSR amplitude at time t.

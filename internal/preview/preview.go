@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/vgalaktionov/runefact/internal/palette"
@@ -103,7 +102,7 @@ func NewPreviewer(filePath, assetsDir string, winW, winH, sampleRate int) *Previ
 
 	return &Previewer{
 		mode:       mode,
-		zoom:       4,
+		zoom:       2,
 		selected:   -1,
 		winW:       winW,
 		winH:       winH,
@@ -201,6 +200,10 @@ func (p *Previewer) Update() error {
 		p.updateSprite()
 	case ModeMapPreview:
 		p.updateMap()
+	case ModeSFXPreview:
+		p.updateSFX()
+	case ModeMusicPreview:
+		p.updateMusic()
 	}
 
 	return nil
@@ -290,7 +293,7 @@ func (p *Previewer) Draw(screen *ebiten.Image) {
 
 func (p *Previewer) drawSpriteMode(screen *ebiten.Image) {
 	if len(p.sprites) == 0 && p.errorMsg == "" {
-		ebitenutil.DebugPrintAt(screen, "No sprites loaded", 10, 10)
+		drawText(screen, "No sprites loaded", 10, 10)
 		return
 	}
 
@@ -305,11 +308,11 @@ func (p *Previewer) drawSpriteMode(screen *ebiten.Image) {
 	}
 
 	if p.paused {
-		ebitenutil.DebugPrintAt(screen, "PAUSED", 10, p.winH-20)
+		drawText(screen, "PAUSED", 10, p.winH-scaledCharH()-6)
 	}
 }
 
-// Layout returns the window dimensions.
+// Layout returns the internal resolution.
 func (p *Previewer) Layout(outsideWidth, outsideHeight int) (int, int) {
 	p.winW = outsideWidth
 	p.winH = outsideHeight
@@ -395,14 +398,84 @@ func (p *Previewer) drawBackground(screen *ebiten.Image) {
 	}
 }
 
+// spriteGridLayout computes the auto-zoom grid layout for the current sprites/window.
+func (p *Previewer) spriteGridLayout() (z float64, cols, padding, cellW, cellH, offsetX, offsetY int) {
+	labelH := scaledCharH() + 6
+	padding = 24
+
+	maxW, maxH := 0, 0
+	maxLabelW := 0
+	for _, s := range p.sprites {
+		if s.FrameW > maxW {
+			maxW = s.FrameW
+		}
+		if s.FrameH > maxH {
+			maxH = s.FrameH
+		}
+		// Estimate label width for this sprite.
+		lbl := fmt.Sprintf("%s %dx%d", s.Name, s.FrameW, s.FrameH)
+		if s.FrameCount > 1 {
+			lbl += fmt.Sprintf(" f:%d/%d @%dfps", s.FrameCount, s.FrameCount, s.FPS)
+		}
+		if w := len(lbl) * scaledCharW(); w > maxLabelW {
+			maxLabelW = w
+		}
+	}
+
+	// Auto-calculate zoom. For each column count, find the max zoom
+	// where both the scaled sprites AND labels fit without overlap.
+	n := len(p.sprites)
+	bestZoom := 1.0
+	bestCols := 1
+	for c := 1; c <= n; c++ {
+		rows := (n + c - 1) / c
+		// Available width per cell = window / cols, minus padding.
+		availW := float64(p.winW)/float64(c) - float64(padding*2)
+		availH := float64(p.winH)/float64(rows) - float64(padding) - float64(labelH)
+
+		zx := availW / float64(maxW)
+		zy := availH / float64(maxH)
+		zFit := min(zx, zy)
+
+		// Cell must also be wide enough for the label text.
+		minCellW := maxLabelW + padding*2
+		maxZoomForLabel := (float64(p.winW)/float64(c) - float64(minCellW-int(float64(maxW)))) / float64(maxW)
+		if maxZoomForLabel < zFit {
+			zFit = maxZoomForLabel
+		}
+
+		if zFit > bestZoom {
+			bestZoom = zFit
+			bestCols = c
+		}
+	}
+	// Snap to integer zoom for pixel-perfect rendering.
+	z = float64(max(1, int(bestZoom)))
+	cols = bestCols
+
+	spriteW := int(float64(maxW) * z)
+	cellW = max(spriteW, maxLabelW) + padding*2
+	cellH = int(float64(maxH)*z) + padding + labelH
+
+	usedCols := min(cols, n)
+	totalW := usedCols * cellW
+	rows := (n + cols - 1) / cols
+	totalH := rows * cellH
+	offsetX = (p.winW - totalW) / 2
+	offsetY = (p.winH - totalH) / 2
+	if offsetY < padding {
+		offsetY = padding
+	}
+	return
+}
+
 // drawSpriteGrid draws all sprites in a grid layout.
 func (p *Previewer) drawSpriteGrid(screen *ebiten.Image) {
 	if len(p.sprites) == 0 {
 		return
 	}
 
-	padding := 8
-	z := float64(p.zoom)
+	z, cols, padding, cellW, cellH, offsetX, offsetY := p.spriteGridLayout()
 
 	maxW, maxH := 0, 0
 	for _, s := range p.sprites {
@@ -414,21 +487,23 @@ func (p *Previewer) drawSpriteGrid(screen *ebiten.Image) {
 		}
 	}
 
-	cellW := int(float64(maxW)*z) + padding*2
-	cellH := int(float64(maxH)*z) + padding*2 + 14
-	cols := max(1, p.winW/cellW)
-
 	for i, s := range p.sprites {
 		col := i % cols
 		row := i / cols
-		cx := col*cellW + padding
-		cy := row*cellH + padding
+		cx := offsetX + col*cellW + padding
+		cy := offsetY + row*cellH
 
 		frame := p.currentFrame(s)
 		if frame < len(s.Frames) {
+			// Center sprite within the cell.
+			spriteW := int(float64(s.FrameW) * z)
+			spriteH := int(float64(s.FrameH) * z)
+			sx := cx + (cellW-padding*2-spriteW)/2
+			sy := cy + (int(float64(maxH)*z)-spriteH)/2
+
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Scale(z, z)
-			op.GeoM.Translate(float64(cx), float64(cy))
+			op.GeoM.Translate(float64(sx), float64(sy))
 			op.Filter = ebiten.FilterNearest
 			screen.DrawImage(s.Frames[frame], op)
 		}
@@ -437,7 +512,10 @@ func (p *Previewer) drawSpriteGrid(screen *ebiten.Image) {
 		if s.FrameCount > 1 {
 			label += fmt.Sprintf(" f:%d/%d @%dfps", frame+1, s.FrameCount, s.FPS)
 		}
-		ebitenutil.DebugPrintAt(screen, label, cx, cy+int(float64(maxH)*z)+2)
+		// Center label under sprite.
+		labelW := len(label) * scaledCharW()
+		labelX := cx + (cellW-padding*2-labelW)/2
+		drawText(screen, label, labelX, cy+int(float64(maxH)*z)+4)
 	}
 }
 
@@ -464,7 +542,7 @@ func (p *Previewer) drawIsolated(screen *ebiten.Image, s *RenderedSprite) {
 	if s.FrameCount > 1 {
 		label += fmt.Sprintf(" f:%d/%d @%dfps", frame+1, s.FrameCount, s.FPS)
 	}
-	ebitenutil.DebugPrintAt(screen, label, 10, 10)
+	drawText(screen, label, 10, 10)
 }
 
 // drawPixelGrid overlays 1px grid lines at pixel boundaries.
@@ -489,7 +567,7 @@ func (p *Previewer) drawPixelGrid(screen *ebiten.Image) {
 
 // drawErrorOverlay renders a semi-transparent red box with error text.
 func (p *Previewer) drawErrorOverlay(screen *ebiten.Image) {
-	boxH := 40
+	boxH := scaledCharH() + 16
 	for y := 0; y < boxH; y++ {
 		for x := 0; x < p.winW; x++ {
 			screen.Set(x, y, color.RGBA{R: 0xcc, G: 0x22, B: 0x22, A: 0xdd})
@@ -499,7 +577,7 @@ func (p *Previewer) drawErrorOverlay(screen *ebiten.Image) {
 	if len(msg) > 100 {
 		msg = msg[:100] + "..."
 	}
-	ebitenutil.DebugPrintAt(screen, "ERROR: "+msg, 10, 12)
+	drawText(screen, "ERROR: "+msg, 10, 8)
 }
 
 // currentFrame computes the current animation frame index.
@@ -520,32 +598,20 @@ func (p *Previewer) hitTestSprite(mx, my int) int {
 		return -1
 	}
 
-	padding := 8
-	z := float64(p.zoom)
-
-	maxW, maxH := 0, 0
-	for _, s := range p.sprites {
-		if s.FrameW > maxW {
-			maxW = s.FrameW
-		}
-		if s.FrameH > maxH {
-			maxH = s.FrameH
-		}
-	}
-
-	cellW := int(float64(maxW)*z) + padding*2
-	cellH := int(float64(maxH)*z) + padding*2 + 14
-	cols := max(1, p.winW/cellW)
+	z, cols, padding, cellW, cellH, offsetX, offsetY := p.spriteGridLayout()
 
 	for i, s := range p.sprites {
 		col := i % cols
 		row := i / cols
-		cx := col*cellW + padding
-		cy := row*cellH + padding
+		cx := offsetX + col*cellW + padding
+		cy := offsetY + row*cellH
 		sw := int(float64(s.FrameW) * z)
 		sh := int(float64(s.FrameH) * z)
 
-		if mx >= cx && mx < cx+sw && my >= cy && my < cy+sh {
+		// Center sprite within cell.
+		sx := cx + (cellW-padding*2-sw)/2
+
+		if mx >= sx && mx < sx+sw && my >= cy && my < cy+sh {
 			return i
 		}
 	}

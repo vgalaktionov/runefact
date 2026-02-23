@@ -162,6 +162,44 @@ func registerTools(s *server.MCPServer, ctx *ServerContext) {
 			},
 		},
 	}, ctx.handleFormatHelp)
+
+	s.AddTool(mcp.Tool{
+		Name:        "runefact_preview_map",
+		Description: "Render a map file as a PNG image and return it inline. Use this to visually inspect map layouts, tile art, and entity placement.",
+		InputSchema: mcp.ToolInputSchema{
+			Type:     "object",
+			Required: []string{"file"},
+			Properties: map[string]any{
+				"file": map[string]any{
+					"type":        "string",
+					"description": "Map file name (e.g., level1.map)",
+				},
+				"scale": map[string]any{
+					"type":        "integer",
+					"description": "Pixel scale factor (default: 2)",
+				},
+			},
+		},
+	}, ctx.handlePreviewMap)
+
+	s.AddTool(mcp.Tool{
+		Name:        "runefact_preview_sprite",
+		Description: "Render a sprite file as a PNG image and return it inline. Shows all sprites with all animation frames laid out in a grid.",
+		InputSchema: mcp.ToolInputSchema{
+			Type:     "object",
+			Required: []string{"file"},
+			Properties: map[string]any{
+				"file": map[string]any{
+					"type":        "string",
+					"description": "Sprite file name (e.g., player.sprite)",
+				},
+				"scale": map[string]any{
+					"type":        "integer",
+					"description": "Pixel scale factor (default: 4)",
+				},
+			},
+		},
+	}, ctx.handlePreviewSprite)
 }
 
 func registerResources(s *server.MCPServer, ctx *ServerContext) {

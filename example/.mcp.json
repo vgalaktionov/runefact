@@ -1,0 +1,11 @@
+{
+	"mcpServers": {
+		"runefact": {
+			"args": [
+				"mcp"
+			],
+			"command": "/home/vadim/go/bin/runefact",
+			"type": "stdio"
+		}
+	}
+}

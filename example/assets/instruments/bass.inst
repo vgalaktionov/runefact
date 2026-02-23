@@ -1,0 +1,10 @@
+name = "bass"
+
+[oscillator]
+waveform = "triangle"
+
+[envelope]
+attack = 0.005
+decay = 0.15
+sustain = 0.5
+release = 0.1

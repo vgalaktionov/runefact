@@ -102,8 +102,8 @@ func TestBackgroundTypeCycling(t *testing.T) {
 
 func TestNewPreviewer(t *testing.T) {
 	p := NewPreviewer("/tmp/test.sprite", "/tmp/assets", 800, 600, 44100)
-	if p.zoom != 4 {
-		t.Errorf("default zoom = %d, want 4", p.zoom)
+	if p.zoom != 2 {
+		t.Errorf("default zoom = %d, want 2", p.zoom)
 	}
 	if p.selected != -1 {
 		t.Errorf("selected = %d, want -1", p.selected)

@@ -38,10 +38,12 @@ func TestAcceptance_InitAndBuild(t *testing.T) {
 	}
 
 	// Verify expected artifacts exist.
-	// Note: both SFX and track are named "demo" — the track overwrites the SFX WAV.
 	expected := []string{
-		"build/assets/sprites/demo.png",
-		"build/assets/maps/demo.json",
+		"build/assets/sprites/player.png",
+		"build/assets/sprites/tiles.png",
+		"build/assets/maps/level1.json",
+		"build/assets/audio/jump.wav",
+		"build/assets/audio/coin.wav",
 		"build/assets/audio/demo.wav",
 		"build/assets/manifest.go",
 	}
@@ -80,7 +82,8 @@ func TestAcceptance_SpriteSheetDimensions(t *testing.T) {
 		t.Fatal("sprite build failed")
 	}
 
-	pngPath := filepath.Join(dir, "build/assets/sprites/demo.png")
+	// player.sprite has idle (32x32) and coin (16x16) and heart (16x16).
+	pngPath := filepath.Join(dir, "build/assets/sprites/player.png")
 	f, err := os.Open(pngPath)
 	if err != nil {
 		t.Fatalf("opening PNG: %v", err)
@@ -92,8 +95,6 @@ func TestAcceptance_SpriteSheetDimensions(t *testing.T) {
 		t.Fatalf("decoding PNG config: %v", err)
 	}
 
-	// The demo sprite has heart (8x8, 1 frame) and star (8x8, 2 frames).
-	// Sheet should be at least 8 pixels tall and wide enough for all sprites.
 	if imgCfg.Width < 8 || imgCfg.Height < 8 {
 		t.Errorf("sprite sheet too small: %dx%d", imgCfg.Width, imgCfg.Height)
 	}
@@ -117,7 +118,7 @@ func TestAcceptance_MapJSONStructure(t *testing.T) {
 		t.Fatal("map build failed")
 	}
 
-	jsonPath := filepath.Join(dir, "build/assets/maps/demo.json")
+	jsonPath := filepath.Join(dir, "build/assets/maps/level1.json")
 	data, err := os.ReadFile(jsonPath)
 	if err != nil {
 		t.Fatalf("reading JSON: %v", err)
@@ -154,15 +155,17 @@ func TestAcceptance_AudioWAVHeaders(t *testing.T) {
 		t.Fatal("audio build failed")
 	}
 
-	// Check SFX WAV.
-	sfxPath := filepath.Join(dir, "build/assets/audio/demo.wav")
-	sfxInfo, err := os.Stat(sfxPath)
-	if err != nil {
-		t.Fatalf("missing SFX WAV: %v", err)
-	}
-	// WAV header is 44 bytes; actual audio data should add more.
-	if sfxInfo.Size() <= 44 {
-		t.Errorf("SFX WAV too small (%d bytes)", sfxInfo.Size())
+	for _, name := range []string{"jump", "coin", "demo"} {
+		wavPath := filepath.Join(dir, "build/assets/audio/"+name+".wav")
+		info, err := os.Stat(wavPath)
+		if err != nil {
+			t.Errorf("missing WAV %s: %v", name, err)
+			continue
+		}
+		// WAV header is 44 bytes; actual audio data should add more.
+		if info.Size() <= 44 {
+			t.Errorf("%s.wav too small (%d bytes)", name, info.Size())
+		}
 	}
 }
 
@@ -244,8 +247,8 @@ sample_rate = 44100
 bit_depth = 16
 
 [preview]
-window_width = 800
-window_height = 600
+window_width = 1200
+window_height = 900
 background = "#1a1a2e"
 pixel_scale = 4
 audio_volume = 0.5
@@ -270,80 +273,379 @@ c = "#008751"
 e = "#5f574f"
 f = "#c2c3c7"
 `,
-		"assets/sprites/demo.sprite": `palette = "default"
-grid = 8
+		"assets/sprites/player.sprite": `palette = "default"
+grid = 32
+
+palette_extend = { "n" = "#1a1a2e", "t" = "#e8d4b8" }
+
+[sprite.idle]
+framerate = 3
+
+[[sprite.idle.frame]]
+pixels = """
+________________________________
+_____________hhhhh______________
+___________hhhhhhhhh____________
+__________hhhhhhhhhh____________
+__________hhhhhhhhhh____________
+__________dddddddddd____________
+_________dddddddddddd___________
+_________dddwkddwkddd___________
+_________dddkkddkkddd___________
+_________ddttttttttdd___________
+_________dddttttttddd___________
+__________dtttsttttd____________
+__________ddttttttdd____________
+___________dddddddd_____________
+___________bbbbbbbbb____________
+__________bbbblbbbbbb___________
+_________bbbbbbbbbbbbb__________
+________sbbbbbbbbbbbbbs_________
+________s_bbbbbbbbbbb_s_________
+__________bbbbbbbbbbb___________
+___________bbb___bbb____________
+___________bbb___bbb____________
+___________bbb___bbb____________
+__________nnnn___nnnn___________
+__________nnnn___nnnn___________
+________________________________
+________________________________
+________________________________
+________________________________
+________________________________
+________________________________
+________________________________
+"""
+
+[[sprite.idle.frame]]
+pixels = """
+________________________________
+_____________hhhhh______________
+___________hhhhhhhhh____________
+__________hhhhhhhhhh____________
+__________hhhhhhhhhh____________
+__________dddddddddd____________
+_________dddddddddddd___________
+_________dddwkddwkddd___________
+_________dddkkddkkddd___________
+_________ddttttttttdd___________
+_________dddttttttddd___________
+__________dtttsttttd____________
+__________ddttttttdd____________
+___________dddddddd_____________
+___________bbbbbbbbb____________
+__________bbbblbbbbbb___________
+_________bbbbbbbbbbbbb__________
+________sbbbbbbbbbbbbbs_________
+________s_bbbbbbbbbbb_s_________
+__________bbbbbbbbbbb___________
+___________bbb___bbb____________
+___________bbb___bbb____________
+__________nbbb___bbbn___________
+__________nnnn___nnnn___________
+___________nn_____nn____________
+________________________________
+________________________________
+________________________________
+________________________________
+________________________________
+________________________________
+________________________________
+"""
+
+[sprite.coin]
+grid = 16
+framerate = 6
+
+[[sprite.coin.frame]]
+pixels = """
+_____yyyy_______
+___yyooooyyy____
+__yooyyyyyooy___
+__yoyyyyyyyyoy__
+__yoyyyy_yyyoy__
+__yoyyyyyyyyoy__
+__yoyyyyyyyyoy__
+__yoyyyyyyyyoy__
+___yooooooooy___
+____yyyyyyyy____
+________________
+________________
+________________
+________________
+________________
+________________
+"""
+
+[[sprite.coin.frame]]
+pixels = """
+______yy________
+_____yooy_______
+____yoyyoy______
+____yoy_oy______
+____yoyyoy______
+____yoyyoy______
+____yoyyoy______
+_____yooy_______
+______yy________
+________________
+________________
+________________
+________________
+________________
+________________
+________________
+"""
+
+[[sprite.coin.frame]]
+pixels = """
+_______y________
+______yoy_______
+______yoy_______
+______yoy_______
+______yoy_______
+______yoy_______
+______yoy_______
+_______y________
+________________
+________________
+________________
+________________
+________________
+________________
+________________
+________________
+"""
+
+[[sprite.coin.frame]]
+pixels = """
+______yy________
+_____yooy_______
+____yoyyoy______
+____yoy_oy______
+____yoyyoy______
+____yoyyoy______
+____yoyyoy______
+_____yooy_______
+______yy________
+________________
+________________
+________________
+________________
+________________
+________________
+________________
+"""
 
 [sprite.heart]
+grid = 16
 pixels = """
-_rr__rr_
-rrrrrrr_
-rrrrrrrr
-rrrrrrrr
-_rrrrrr_
-__rrrr__
-___rr___
-________
-"""
-
-[sprite.star]
-framerate = 4
-
-[[sprite.star.frame]]
-pixels = """
-____y___
-___yyy__
-__yyyyy_
-___yyy__
-____y___
-________
-________
-________
-"""
-
-[[sprite.star.frame]]
-pixels = """
-________
-___y_y__
-____y___
-__yyyyy_
-____y___
-___y_y__
-________
-________
+________________
+___rr____rr_____
+__rrrr__rrrr____
+_rrrrrrrrrrrr___
+_rrrrrrrrrrrr___
+_rrrrrrrrrrrr___
+__rrrrrrrrrr____
+___rrrrrrrr_____
+____rrrrrr______
+_____rrrr_______
+______rr________
+________________
+________________
+________________
+________________
+________________
 """
 `,
-		"assets/maps/demo.map": `tile_size = 8
+		"assets/sprites/tiles.sprite": `palette = "default"
+grid = 16
+
+[sprite.grass]
+pixels = """
+ccggccggccggccgg
+ggccggccggccggcc
+ccgcgcgcgcgcgccc
+gcccccggccccccgc
+ccchccccchccccch
+hchhhhhchhhhhchh
+hhhhhhhhhhhhhhhh
+hhehhhhhehhhhehh
+hhhhhhhhhhhhhhhh
+hhehhhhhhhehhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhehhhhhhhhh
+hhehhhhhhhhhhehh
+hhhhhhhhhhhhhhhh
+hhhhhhehhhhhhhhh
+hhhhhhhhhhhhhhhh
+"""
+
+[sprite.dirt]
+pixels = """
+hhhhhhhhhhhhhhhh
+hhehhhhhehhhhehh
+hhhhhhhhhhhhhhhh
+hhhhhhehhhhhhhhh
+hhehhhhhhhehhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhehhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhehhhhhehhhhehh
+hhhhhhhhhhhhhhhh
+hhhhhhehhhhhhhhh
+hhehhhhhhhehhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhehhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhehhhhhehhhhehh
+"""
+
+[sprite.stone]
+pixels = """
+eeffffffeeffffff
+flllllfeflllllfe
+flllflfefllflffe
+flllllfeflllllfe
+eeffffffeeffffff
+feflllleefellllf
+fefllfleefelfllf
+feflllleefellllf
+eeffffffeeffffff
+flllllfeflllllfe
+flllflfefllflffe
+flllllfeflllllfe
+eeffffffeeffffff
+feflllleefellllf
+fefllfleefelfllf
+feflllleefellllf
+"""
+
+[sprite.sky]
+pixels = """
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+"""
+`,
+		"assets/maps/level1.map": `tile_size = 16
 
 [tileset]
-H = "demo:heart"
-S = "demo:star"
 _ = ""
+g = "tiles:grass"
+d = "tiles:dirt"
+s = "tiles:stone"
+b = "tiles:sky"
+
+[layer.background]
+scroll_x = 0.5
+pixels = """
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbb
+"""
 
 [layer.main]
 pixels = """
-________
-_H___H__
-________
-_S_S_S__
-________
-________
-________
-________
+________________
+________________
+________________
+________________
+_______sss______
+________________
+__gg_______gg___
+__dd_______dd___
+gggggggggggggggg
+dddddddddddddddd
 """
+
+[layer.entities]
+
+[[layer.entities.entity]]
+type = "spawn"
+x = 2
+y = 7
+[layer.entities.entity.properties]
+sprite = "player:idle"
+
+[[layer.entities.entity]]
+type = "coin"
+x = 4
+y = 5
+[layer.entities.entity.properties]
+sprite = "player:coin"
+
+[[layer.entities.entity]]
+type = "coin"
+x = 8
+y = 3
+[layer.entities.entity.properties]
+sprite = "player:coin"
+
+[[layer.entities.entity]]
+type = "coin"
+x = 11
+y = 5
+[layer.entities.entity.properties]
+sprite = "player:coin"
+
+[[layer.entities.entity]]
+type = "enemy"
+x = 13
+y = 7
+[layer.entities.entity.properties]
+sprite = "player:heart"
 `,
-		"assets/instruments/demo.inst": `name = "demo"
+		"assets/instruments/lead.inst": `name = "lead"
 
 [oscillator]
 waveform = "square"
+duty_cycle = 0.5
 
 [envelope]
 attack = 0.01
 decay = 0.1
 sustain = 0.6
-release = 0.15
+release = 0.2
+
+[filter]
+type = "lowpass"
+cutoff = 2000
+resonance = 0.2
 `,
-		"assets/sfx/demo.sfx": `duration = 0.15
-volume = 0.8
+		"assets/instruments/bass.inst": `name = "bass"
+
+[oscillator]
+waveform = "triangle"
+
+[envelope]
+attack = 0.005
+decay = 0.15
+sustain = 0.5
+release = 0.1
+`,
+		"assets/sfx/jump.sfx": `duration = 0.2
+volume = 0.7
 
 [[voice]]
 waveform = "square"
@@ -351,41 +653,94 @@ duty_cycle = 0.5
 
 [voice.envelope]
 attack = 0.0
-decay = 0.05
-sustain = 0.3
-release = 0.1
+decay = 0.08
+sustain = 0.2
+release = 0.12
 
 [voice.pitch]
-start = 200
-end = 600
+start = 220
+end = 660
 curve = "exponential"
 `,
-		"assets/tracks/demo.track": `tempo = 120
+		"assets/sfx/coin.sfx": `duration = 0.12
+volume = 0.6
+
+[[voice]]
+waveform = "square"
+duty_cycle = 0.25
+
+[voice.envelope]
+attack = 0.0
+decay = 0.03
+sustain = 0.4
+release = 0.09
+
+[voice.pitch]
+start = 880
+end = 1320
+curve = "linear"
+`,
+		"assets/tracks/demo.track": `tempo = 140
 ticks_per_beat = 4
 loop = true
 loop_start = 0
 
 [[channel]]
 name = "melody"
-instrument = "demo"
-volume = 0.8
+instrument = "lead"
+volume = 0.7
 
-[pattern.main]
-ticks = 8
+[[channel]]
+name = "bass"
+instrument = "bass"
+volume = 0.6
+
+[pattern.intro]
+ticks = 16
 data = """
-melody
-C4
----
-E4
----
-G4
----
-E4
----
+melody  | bass
+C4      | C2
+---     | ---
+E4      | ---
+---     | ---
+G4      | G2
+---     | ---
+E4      | ---
+---     | ---
+A4      | A2
+---     | ---
+G4      | ---
+---     | ---
+E4      | E2
+---     | ---
+D4      | ---
+---     | ---
+"""
+
+[pattern.verse]
+ticks = 16
+data = """
+melody  | bass
+E4      | A2
+---     | ---
+D4      | ---
+---     | ---
+C4      | F2
+---     | ---
+D4      | ---
+---     | ---
+E4      | G2
+---     | ---
+E4      | ---
+---     | ---
+E4      | C2
+---     | ---
+^^^     | ---
+...     | ^^^
 """
 
 [song]
-sequence = ["main", "main"]
+sequence = ["intro", "verse", "intro", "verse"]
 `,
 	}
 
