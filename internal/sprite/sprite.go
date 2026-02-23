@@ -265,6 +265,9 @@ func (sf *SpriteFile) Resolve(pal *palette.Palette) ([]ResolvedSprite, error) {
 		colors[k] = c
 	}
 
+	// "_" is always transparent, even if not defined in the palette.
+	colors["_"] = palette.Color{A: 0}
+
 	var resolved []ResolvedSprite
 	for _, s := range sf.Sprites {
 		rs, err := resolveSprite(s, colors)

@@ -229,6 +229,41 @@ func TestSpriteFile_Resolve(t *testing.T) {
 	}
 }
 
+func TestSpriteFile_Resolve_UnderscoreAlwaysTransparent(t *testing.T) {
+	// "_" should be transparent even when NOT defined in the palette.
+	pal := &palette.Palette{
+		Name: "test",
+		Colors: map[string]palette.Color{
+			"r": {R: 255, A: 255},
+		},
+	}
+
+	sf := &SpriteFile{
+		PaletteRef:  "test",
+		DefaultGrid: Grid{W: 2, H: 2},
+		Sprites: []Sprite{
+			{
+				Name: "dot",
+				Grid: Grid{W: 2, H: 2},
+				Frames: []Frame{
+					{Pixels: [][]string{{"_", "r"}, {"r", "_"}}},
+				},
+			},
+		},
+	}
+
+	resolved, err := sf.Resolve(pal)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !resolved[0].Frames[0].Pixels[0][0].IsTransparent() {
+		t.Error("expected transparent at 0,0 when _ is not in palette")
+	}
+	if resolved[0].Frames[0].Pixels[1][1].IsTransparent() == false {
+		t.Error("expected transparent at 1,1 when _ is not in palette")
+	}
+}
+
 func TestSpriteFile_Resolve_UnknownKey(t *testing.T) {
 	pal := &palette.Palette{
 		Name:   "test",
