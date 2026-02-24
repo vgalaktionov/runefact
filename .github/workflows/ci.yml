@@ -19,10 +19,16 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Install X11 headers (Linux)
+      - name: Install X11 dependencies (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libx11-dev libgl-dev libxrandr-dev libxxf86vm-dev libxi-dev libxcursor-dev libxinerama-dev libasound2-dev
+        run: sudo apt-get update && sudo apt-get install -y libx11-dev libgl-dev libxrandr-dev libxxf86vm-dev libxi-dev libxcursor-dev libxinerama-dev libasound2-dev xvfb
 
       - run: go vet ./...
 
-      - run: go test -race ./...
+      - name: Run tests (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run go test -race ./...
+
+      - name: Run tests (non-Linux)
+        if: runner.os != 'Linux'
+        run: go test -race ./...
